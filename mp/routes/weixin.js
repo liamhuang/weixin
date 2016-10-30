@@ -8,10 +8,14 @@ var express = require('express');
 var router = express.Router();
 
 /* GET users listing. */
-router.get('/cgi/weixin/auth', function(req, res, next) {
-    if( req && req.echostr ){
-       res.send( req.echostr );
+router.get('/auth', function(req, res, next) {
+    console.log( JSON.stringify( req.query ));
+    if( req && req.query &&  req.query.echostr ){
+       res.send( req.query.echostr );
+    }else{
+        res.send( "echostr not found");
     }
+
 });
 
 module.exports = router;
