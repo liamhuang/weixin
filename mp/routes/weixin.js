@@ -8,7 +8,7 @@ var express = require('express');
 var router = express.Router();
 
 /* GET users listing. */
-router.get('/weixin/auth', function(req, res, next) {
+router.get('/cgi/weixin/auth', function(req, res, next) {
     if( req && req.echostr ){
        res.send( req.echostr );
     }
