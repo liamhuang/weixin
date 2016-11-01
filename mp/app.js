@@ -32,7 +32,6 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-// error handlers
 
 // development error handler
 // will print stacktrace
@@ -55,6 +54,10 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
+
+
+//进来的第一件事情是去更新token，如果token没有获取到，就提示错误。
+//model.getToken();
 
 
 module.exports = app;
