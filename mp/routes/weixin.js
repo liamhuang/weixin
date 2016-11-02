@@ -9,7 +9,7 @@ var router    = express.Router();
 var Crypto    = require("crypto");
 
 /* GET users listing. */
-router.get('/auth', function(req, res, next) {
+router.get('/', function(req, res, next) {
     req       = req ||{};
     req.query = req.query ||{};
     console.log( JSON.stringify( req.query ) );

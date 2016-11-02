@@ -7,6 +7,11 @@ var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 var weixin = require('./routes/weixin');
+var access = require('./model/access');     //这个应该做成一个express中间件的更加合适。这里先这么做
+
+access.getToken(  function( token ){
+    console.log( token )
+});
 
 var app = express();
 
@@ -54,6 +59,7 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
+
 
 
 //进来的第一件事情是去更新token，如果token没有获取到，就提示错误。
