@@ -11,7 +11,7 @@ var CryptoJS  = require("crypto-js");
 /* GET users listing. */
 router.get('/auth', function(req, res, next) {
     req       = req ||{};
-    req.query = req.qurey ||{};
+    req.query = req.query ||{};
     console.log( JSON.stringify( req.query ) );
 
     var signature = req.query.signature || "";  //校验的token
@@ -29,15 +29,16 @@ router.get('/auth', function(req, res, next) {
 
         var str         = arr.join("");
         var caculateStr = CryptoJS.HmacSHA1(str).toString();
-
+        console.log( "caculateStr" + caculateStr +"\n");
+        console.log( "signature"   + signature +"\n");
         if( caculateStr == signature ){
             res.send( req.query.echostr );
         }else{
-            res.send( "echostr not found");
+            res.send( "compare error, signature is not equal to cacluateStr");
         }
        
     }else{
-        res.send( "echostr not found");
+        res.send( "param is not complete " + JSON.stringify( req.query ));
     }
 });
 
