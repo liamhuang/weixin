@@ -10,7 +10,7 @@ var Crypto    = require("crypto");
 var xml2js    = require("xml2js");
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
+router.all('/', function(req, res, next) {
     req       = req ||{};
     req.query = req.query ||{};
     req.body  = req.body ||"";   //这里的body都是通过xml的方式传递的，所以需要设置一下。
