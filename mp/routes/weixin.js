@@ -6,7 +6,7 @@
  * ******/
 var express   = require('express');
 var router    = express.Router();
-var CryptoJS  = require("crypto-js");
+var Crypto    = require("crypto");
 
 /* GET users listing. */
 router.get('/auth', function(req, res, next) {
@@ -24,13 +24,15 @@ router.get('/auth', function(req, res, next) {
         var arr = [ token , timestamp , nonce];
         
         arr.sort( function( a , b ){   //将三个按照顺序排列
-            return a > b ? 1 : -1;
+            return (a+"") > (b+"")?1:-1 ;
         });
 
         var str         = arr.join("");
-        var caculateStr = CryptoJS.HmacSHA1(str).toString();
-        console.log( "caculateStr" + caculateStr +"\n");
-        console.log( "signature"   + signature +"\n");
+        var caculateStr = Crypto.createHash("sha1").update( str ).digest("hex");
+
+        console.log( arr.join("") + "\n");
+        console.log( "caculateStr:" + caculateStr +"\n");
+        console.log( "signature:"   + signature +"\n");
         if( caculateStr == signature ){
             res.send( req.query.echostr );
         }else{
