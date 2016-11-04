@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var weixin = require('./routes/weixin');
 var access = require('./model/access');     //这个应该做成一个express中间件的更加合适。这里先这么做
+var lapp   = require('./routes/app');   //微信小程序的入口
 
 access.getToken(  function( token ){
     console.log( token )
@@ -16,18 +17,19 @@ access.getToken(  function( token ){
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+//app.set('views', path.join(__dirname, 'views'));
+//app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-//app.use(bodyParser.json());
-//app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.text());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/cgi/weixin/', weixin);
+app.use('/cgi/app/' , lapp );
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
