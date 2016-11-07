@@ -11,7 +11,7 @@ Page({
     
   },
   getTurboList:function( cb ){
-    var data = {"target": 700, "type":0};
+    var data = {"target": 700, "type":1};
 
     var url  = "https://app.liamhuang.com?action=getTurboList"; 
     wx.request( {
@@ -19,7 +19,9 @@ Page({
       "data" : data,
       "method" : "get",
       "success": function( result ){
+        debugger;
           var list = [];
+          var ret  = result.data||{};
           if( 0 == ret.code && ret.data && ret.data.length ){
               for( var i = 0 ; i < ret.data.length  ; i ++){
                 var cur = ret.data[i];

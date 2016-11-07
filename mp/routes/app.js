@@ -25,6 +25,7 @@ router.all('/', function(req, res, next) {
         //这里需要从mysql中获取数据，然后返回给前提
         mysql.getAllTurbo( query.code ,query.type , function( ret,rows ){
             if( 0 == ret ){
+                console.log( JSON.stringify( rows ) )
 				if( rows && rows.length > 0 ){         //如果获取了数据，就直接展示出来
 
 					var data = [];
@@ -42,11 +43,13 @@ router.all('/', function(req, res, next) {
 					res.send( [] );
 				}
 			}else{
+                console.log("got error ");
 				res.send( [] );
 			}
         } );
 
     }else{
+        console.log("action error ");
         res.send( {data:{"test":"fdasfdsa"}} );
     }
    
