@@ -1,0 +1,28 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+<div id="a"></div>
+<script src="http://qt.gtimg.cn/r=0.7922556204721332&q=r_hk28347"></script>
+<script>
+function gb2utf8(data){
+　　var glbEncode = [];
+	gb2utf8_data = data;
+	execScript("gb2utf8_data = MidB(gb2utf8_data, 1)", "VBScript");
+　　var t=escape(gb2utf8_data).replace(/%u/g,"").replace(/(.{2})(.{2})/g,"%$2%$1").replace(/%([A-Z].)%(.{2})/g,"@$1$2");
+　　t=t.split("@");
+　　var i=0,j=t.length,k;
+　　while(++i
+　　　　k=t[i].substring(0,4);
+　　　　if(!glbEncode[k]) {
+　　　　　　gb2utf8_char = eval_r("0x"+k);
+　　　　　　execScript("gb2utf8_char = Chr(gb2utf8_char)", "VBScript");
+　　　　　　glbEncode[k]=escape(gb2utf8_char).substring(1,6);
+　　　　}
+　　　　t[i]=glbEncode[k]+t[i].substring(4);
+　　}
+	gb2utf8_data = gb2utf8_char = null;
+　　return (t.join("%"));　}
+</script>
+</body>

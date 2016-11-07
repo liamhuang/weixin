@@ -1,0 +1,376 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>权证认购</title>
+</head>
+<body>
+	<span style="color:red;">Q1:5.14 | Q2:8.13 | Q3:11.12 | Q4:3.19</span>
+	<br/><br/>
+	时间: <select id="select_time"></select>
+	价格: <select id="select_price"></select>
+  行权价: <select id="select_exchange_price"></select>
+  打和价: <select id="select_match_price"></select>
+  交易量: <select id="select_deal_mount"></select>	
+	<br/><br/>
+
+	<div style="display:block;width:100%;">
+	<div id="container" style="text-align:center;">
+	
+	</div>
+	</div>
+</body>
+<script type="text/tmpl" id="table_tpl">
+	<table border=1>
+		<tr><th>名称</th>
+			<th _event="sortByPrice">当前价格</th>
+			<th _event="sortByExchangePrice">行权价格</th>
+			<th _event="sortByDealMount">交易量(万股)</th>
+			<th _event="sortByExchangeDate">行权时间</th>
+			<th _event="sortByRate">溢价比</th>
+			<th _event="sortBymatchPrice">打和价</th>
+			<th _event="">标价格</th>
+			<th>查看</th>
+		</tr>
+		<%for(var i=0 , item ; item=data[i];i++){%>
+			<tr>
+				<td style="width:120px"><%=item.name%><%=item.code%> </td>
+				<td><%=item.curPrice%></td>
+				<td><%=item.exchangePrice%></td>
+				<td><%=(item.dealMount/10000).toFixed(2)%></td>
+				<td><%=item.finalDate%></td>
+				<td><%=item.share%></td>
+				<td><%=item.matchPrice%></td>
+				<td><%=item.targetPrice%></td>
+				<td><a target="_blank" href="http://stock.qq.com/hk<%=item.code%>">查看</a></td>
+			</tr>
+		<%}%>
+	</table>
+</script>
+<script src="http://qt.gtimg.cn/r=0.7922556204721332&q=r_hk00700" charset="GBK"></script>
+<script src="./jquery.js"></script>
+<script src="./base_lib.js"></script>
+<script type="text/javascript">
+	var allTurboData    = [];          //所有的数据
+	var renderTurboData = [];
+	var table_tmpl      = $("#table_tpl").html();
+	var container       = $("#container");
+	var curYear         = new Date().getFullYear();
+	var curMonth        = new Date().getMonth()+1;
+
+	var timeSelecter     = $("#select_time");                 //时间月份选择
+	var priceSelecter    = $("#select_price");                //当前价格
+	var exchangeSelecter = $("#select_exchange_price");   //行权价
+	var matchSelecter    = $("#select_match_price");      //打和价
+
+
+	//初始化dom，上面的筛选部分。其他的是排序部分
+	(function(){
+		
+		timeSelecter.append('<option value="all">all</option>')
+		for(var i = curYear ; i < curYear + 3 ; i++){
+			for( var j = 1 ; j <= 12 ; j++){
+				;
+				var time     = i+"-"+ ( j < 10?"0"+j:j);
+				var date = new Date( time );
+				if( date > new Date() ){
+					timeSelecter.append('<option value="'+time+'">'+time+'</option>')
+				}
+			}
+		}
+		timeSelecter.bind("change" , function(){
+			filt();
+		});
+
+		priceSelecter.append('<option value="all">all</option>')
+		var priceArr = [ 0.1 , 0.2, 0.3 , 0.5 , 1];
+		for(var i = 0; i < priceArr.length ; i++){
+			var cur = priceArr[i];
+			priceSelecter.append('<option value="'+cur+'">'+cur+'</option>')
+		}
+		priceSelecter.bind("change" , function(){
+			
+			filt(  );
+		});
+
+		exchangeSelecter.append('<option value="all">all</option>');
+		var exchangeBase = 180;
+		for( var i = 0 ; i <= 20 ; i++){
+			var cur = exchangeBase + i*10;
+			exchangeSelecter.append('<option value='+cur+'>'+cur+'</option>');
+		}
+		exchangeSelecter.bind("change" , function(){
+			filt( );
+		});
+
+		matchSelecter.append('<option value="all">all</option>');
+		for( var i = 0 ; i <= 10 ; i++){
+			var cur = exchangeBase + i*5;
+			matchSelecter.append('<option value='+cur+'>'+cur+'</option>');
+		}
+		matchSelecter.bind("change" , function( evt ){
+			filt( );
+		});
+
+
+	})();
+
+	function getTurboList( code , callback ){
+		if( v_r_hk00700 ){          //分析数据，然后获取当前的价格
+			var arr         = v_r_hk00700.split("~");
+			var targetPrice = arr[ 3 ];	
+		}
+		net.get( "./getAllTurbo", {"target": code, "type":0}, function( ret ){
+	
+			if( 0 == ret.code && ret.data && ret.data.length ){
+			
+				for( var i = 0 ; i < ret.data.length  ; i ++){
+					var cur = ret.data[i];
+					
+					if( cur && cur.code ){
+						cur.targetPrice = targetPrice;
+						cur.matchPrice  = Math.floor(cur.exchangePrice*1 + 100*cur.curPrice);
+						cur.name        = decodeURIComponent(cur.name);
+						var temShare    = (cur.exchangePrice + cur.curPrice*cur.exchange)/cur.targetPrice - 1;
+						cur.share       = Math.floor(temShare*1000)/1000;    
+						allTurboData.push( cur );
+					
+					}
+				}
+				
+				renderTurboData = allTurboData;
+				callback && callback();
+			}else{
+			
+				alert( ret.msg || "出错了，世界要崩溃了");
+			
+			}
+		});
+	};
+
+	//筛选方法集合，按照顺序来筛选，任何一次操作，都重新筛选
+	function filt( ){
+		 
+		var date= timeSelecter.val();
+		var price    = priceSelecter.val();
+		var exchange = exchangeSelecter.val();
+		var match    = matchSelecter.val();
+		var arr = filtByDate( date , allTurboData );
+		arr     = filtByPrice( price , arr );
+		arr     = filtByExchange( exchange , arr );
+		arr     = filtyByMatch( match  , arr );
+		renderTurboData = arr;
+
+		render();
+	};
+	
+	//按照时间来筛选
+	function filtByDate( base , data ){
+
+		data = data||[];
+		if( "all" == base ){
+			return data;
+		}
+
+		var arr      = [];
+		var baseDate = new Date( base );
+		for( var i = 0 ; i < data.length ; i ++ ){
+			var cur = data[i];
+			var date = new Date( cur.finalDate );
+
+			if( date > baseDate ){
+				arr.push( cur );
+			}
+		}
+		return arr||[];
+	};
+
+
+	//按照价格来赛选
+	function filtByPrice( base  , data ){
+		
+		data = data||[];
+		if( "all" == base ){
+			return data;
+		}
+
+		var arr      = [];
+		for( var i = 0 ; i < data.length ; i ++ ){
+			var cur  = data[i];
+			
+			if( base >= cur.curPrice  ){
+				arr.push( cur );
+			}
+		}
+		return arr||[];
+	};
+	
+	//按照行权价来筛选
+	function filtByExchange( base ,data ){
+		data = data||[];
+		if( "all" == base ){
+			return data;
+		}
+
+		var arr      = [];
+		for( var i = 0 ; i < data.length ; i ++ ){
+			var cur = data[i];
+			
+			if( base > cur.exchangePrice ){
+				arr.push( cur );
+			}
+		}
+		return arr||[];
+	
+	};
+	//按照打和价来筛选
+	function filtyByMatch( base ,data ){
+
+		data = data||[];
+		if( "all" == base ){
+			return data;
+		}
+
+		var arr      = [];
+		for( var i = 0 ; i < data.length ; i ++ ){
+			var cur = data[i];
+			
+			if( base*1 > cur.matchPrice*1 ){
+				arr.push( cur );
+			}
+		}
+		return arr||[];
+	};
+
+	/********************这里操作的对象都是renderTurboData********************/
+	//按照行权日期来排序
+	function rankByDate(){
+		
+		renderTurboData.sort( function( a , b ){
+			a = a || {};
+			b = b || {};
+
+			return  new Date( a.finalDate ) - new Date(b.finalDate);
+
+		});
+		render();
+	};
+	
+	//按照当前的价格来排序
+	function rankByPrice(){
+
+		renderTurboData.sort( function( a , b ){
+			a = a || {};
+			b = b || {};
+
+			return  a.curPrice - b.curPrice;
+
+		});
+		render();
+	};
+	
+	//按照溢价来排序
+	function rankByShare(){
+	
+		renderTurboData.sort( function( a , b ){
+			a = a || {};
+			b = b || {};
+
+			return  a.share - b.share;
+
+		});
+		render();
+	
+	
+	};
+	
+	//按照行权价来排序
+	function rankByExchange(){
+		
+		renderTurboData.sort( function( a , b ){
+			a = a || {};
+			b = b || {};
+
+			return  a.exchangePrice - b.exchangePrice;
+
+		});
+		render();
+	}
+
+	//按照交易量来排序
+	function rankByDealMount(){
+		
+		renderTurboData.sort( function( a , b ){
+			a = a || {};
+			b = b || {};
+
+			return  a.dealMount - b.dealMount;
+
+		});
+		render();
+	}
+
+	//按照打和价来排序
+	function rankByMatchPrice(){
+		
+		renderTurboData.sort( function( a , b ){
+			a = a || {};
+			b = b || {};
+
+			return  a.matchPrice - b.matchPrice;
+
+		});
+		render();
+	}
+
+	//渲染方法
+	var render = function( ){
+	
+		v_r_hk00700  && container.html( tmpl( table_tmpl , {"data": renderTurboData}));
+
+	}
+	
+
+		
+	window.onload = function(){
+	
+		getTurboList( 700 , render);
+		
+		Y.event.bindClick( document.body , {
+			"sortByPrice" :function(){
+
+				rankByPrice();
+
+			},
+			"sortByExchangePrice":function(){
+
+				rankByExchange();
+
+			},
+			"sortByDealMount":function(){
+
+				rankByDealMount();
+
+			},
+			"sortByRate":function(){
+
+				rankByShare();
+
+			},
+			"sortByExchangeDate":function(){
+
+				rankByDate();
+
+			},
+			"sortBymatchPrice":function(){
+
+				rankByMatchPrice();
+
+			}
+		});
+	}
+	
+	
+	
+	
+</script>
+</html>
