@@ -21,11 +21,11 @@ router.all('/', function(req, res, next) {
     var echostr   = req.query.echostr   || "";  //随机字符
 
     console.log( req.url );
-    if( "getTurboList" == query.action ){   //这里进一步的区分数据的类型
+    if( "getTurboList" == query.action &&  query.code ){   //这里进一步的区分数据的类型
         //这里需要从mysql中获取数据，然后返回给前提
         mysql.getAllTurbo( query.code ,query.type , function( ret,rows ){
+            
             if( 0 == ret ){
-                console.log( JSON.stringify( rows ) )
 				if( rows && rows.length > 0 ){         //如果获取了数据，就直接展示出来
 
 					var data = [];
@@ -38,19 +38,19 @@ router.all('/', function(req, res, next) {
 						}
 					}
 					
-					res.send( data );
+					res.send( {code: 0 ,data: data } );
 				}else{               //如果获取了数量为0 ， 则展示对映错误
-					res.send( [] );
+					res.send( {code: 0 ,data: []} );
 				}
 			}else{
                 console.log("got error ");
-				res.send( [] );
+				res.send( {code: -1000 ,data: [] , msg:"got data error"} );
 			}
         } );
 
     }else{
         console.log("action error ");
-        res.send( {data:{"test":"fdasfdsa"}} );
+        res.send( {code: -1000 ,data: [] , msg:"action error"} );
     }
    
     

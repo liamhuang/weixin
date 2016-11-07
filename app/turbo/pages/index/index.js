@@ -11,7 +11,7 @@ Page({
     
   },
   getTurboList:function( cb ){
-    var data = {"target": 700, "type":1};
+    var data = {"code": 700, "type":1};
 
     var url  = "https://app.liamhuang.com?action=getTurboList"; 
     wx.request( {
@@ -36,6 +36,8 @@ Page({
                 }
               }
               cb && cb( list );
+          }else{
+            cb && cb( [] );
           }
       },
       "fail":function(){
