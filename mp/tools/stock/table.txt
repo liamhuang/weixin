@@ -21,5 +21,6 @@ create table turbo(
     exchange         int(4),
     exchangePrice    float(10,3) ,
     finalDate        varchar(15),
-    time             int(13) not null
+    time             int(13) not null,
+    type             int no null
 );	
