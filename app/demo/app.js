@@ -7,7 +7,7 @@ App({
         console.log("success" + JSON.stringify( res ));
 
         if( res && res.code  ){
-          var url = "https://app.liamhuang.com?action=getLogin";
+          var url = "https://app.liamhuang.com?action=login";
 
           wx.request({
             "url" : url,
@@ -16,11 +16,11 @@ App({
             },
             "method": "GET",
             "success":function( res ){
-                if( res && 0 == res.code ){   //获取到了数据之后，再将加密数据传到后台。用来校验和解密
+                if( res && res.data && 0 == res.data.code ){   //获取到了数据之后，再将加密数据传到后台。用来校验和解密
                   console.log( "login success");
                   wx.getUserInfo( {
                     success:function( res ){
-                      if( res && res.rawData && res.iv && res.encryptedData ){
+                      if(  res.rawData && res.iv && res.encryptedData ){
                         that.decryptInfo( res );
                       }else{
                         console.log("get user info error ");
@@ -56,7 +56,7 @@ App({
             "data": data,
             "method": "GET",
             "success":function( res ){
-                if( res && 0 == res.code ){   //获取到了数据之后，再将加密数据传到后台。用来校验和解密
+                if( res && res.data && 0 == res.data.code ){   //获取到了数据之后，再将加密数据传到后台。用来校验和解密
                   console.log( "decrypt successfully");
                   success && success();
                 }else{

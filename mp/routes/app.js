@@ -95,7 +95,7 @@ router.all('/', function(req, res, next) {
             res.send( {code:-10002 , msg:"timeout"});
         });
 
-    }else if( "decrypt" == action ){
+    }else if( "decrypt" == query.action ){
         if( query.iv && query.encryptedData ){
             var pc = new WXBizDataCrypt(appId, sessionKey);
             var data = pc.decryptData( query.encryptedData , query.iv);
