@@ -5,10 +5,16 @@
  * 
  * ******/
 var express   = require('express');
+var https     = require("https");
 var router    = express.Router();
 var Crypto    = require("crypto");
 var xml2js    = require("xml2js");
 var mysql     = require("../model/mysql_server");
+
+var sessionKey = "";
+var openId     = "";
+var appId      = "wx00dd65d70f19dcec";
+var appSecret  = "f6be58d48df16ecbd6a57d83421ca48e";
 
 /* GET users listing. */
 router.all('/', function(req, res, next) {
@@ -48,12 +54,62 @@ router.all('/', function(req, res, next) {
 			}
         } );
 
+    }else if( "login" == query.action &&  query.code ){ //登陆操作
+        var furl = "https://api.weixin.qq.com/sns/jscode2session";
+        var data = {
+            appid :  appId, 
+            secret:  appSecret,
+            js_code: query.code||"",
+            grant_type: "authorization_code"
+        };
+        var params = [];
+        for( var i in data ){
+            var cur = data[i];
+            i && params.push( i + "=" + data[i] );
+        }
+
+        furl += "?" + params.join("&");
+        console.log( furl );
+        var req = https.get( furl , function( re ){
+            var resultData = '';
+            re.on('data', function(chunk) {
+                resultData += chunk;
+            }).on('end', function( chunk ) {
+                try{
+                    var result = JSON.parse( resultData );
+                    console.log( resultData );
+                    sessionKey = result.session_key||"";
+                    openId     = result.openid||"";
+                    res.send( {code:0 , data: result } );
+                }catch(e){
+                    console.log("error");
+                    res.send( {code:-10001 , msg:"get openid error"});
+                }
+            });
+        });
+        
+        req.on("timeout", function() {
+            console.log("timeout");
+            req.res && req.res.emit("abort");
+            req.abort();
+            res.send( {code:-10002 , msg:"timeout"});
+        });
+
+    }else if( "decrypt" == action ){
+        if( query.iv && query.encryptedData ){
+            var pc = new WXBizDataCrypt(appId, sessionKey);
+            var data = pc.decryptData( query.encryptedData , query.iv);
+            console.log( JSON.stringify( data ));
+            res.send( {code:-10004 , msg:"decrypt error"});
+        }else{
+            console.log( "decrypt param error");
+            res.send( {code:-10003 , msg:"dcrypt param error"});
+        }
+
     }else{
         console.log("action error ");
-        res.send( {code: -1000 ,data: [] , msg:"action error"} );
+        res.send( {code: -10000 ,data: [] , msg:"action error"} );
     }
-   
-    
 });
 
 module.exports = router;
