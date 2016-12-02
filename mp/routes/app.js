@@ -10,8 +10,9 @@ var router    = express.Router();
 var Crypto    = require("crypto");
 var xml2js    = require("xml2js");
 var mysql     = require("../model/mysql_server");
+var WXBizDataCrypt = require('../util/WXBizDataCrypt')
 
-var sessionKey = "";
+var sessionKey = "icHMccqKP3WVOaxd8ZapOA==";
 var openId     = "";
 var appId      = "wx00dd65d70f19dcec";
 var appSecret  = "f6be58d48df16ecbd6a57d83421ca48e";
@@ -97,10 +98,11 @@ router.all('/', function(req, res, next) {
 
     }else if( "decrypt" == query.action ){
         if( query.iv && query.encryptedData ){
+            console.log("query param "+ JSON.stringify( query ));
+            
             var pc = new WXBizDataCrypt(appId, sessionKey);
             var data = pc.decryptData( query.encryptedData , query.iv);
-            console.log( JSON.stringify( data ));
-            res.send( {code:-10004 , msg:"decrypt error"});
+            res.send( {"code":0 , "data": data});
         }else{
             console.log( "decrypt param error");
             res.send( {code:-10003 , msg:"dcrypt param error"});
