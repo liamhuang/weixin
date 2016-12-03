@@ -26,16 +26,37 @@ var easyUTF8 = function( gbk ){
         }  
     }  
     return utf8.join('');  
-};  
+}; 
+
+
+var textArr = [
+	'天',
+	'时间(CST)',	
+	'气温',	
+	'风冷温',	
+	'露点',	
+	'湿度',	
+	'气压',	
+	'能见度',	
+	'Wind Dir',	
+	'风速',	
+	'瞬间风速',	
+	'Precip',	
+	'活动',	
+	'状况'
+];
+
 
 
 //获取数据
 function getWeaterData( year , month , day){
 
-	var r    = Math.random();
-	var furl = 'https://www.wunderground.com/history/airport/ZSQD/2016/12/01/DailyHistory.html?req_city=青岛&req_statename=China&reqdb.zip=00000&reqdb.magic=12&reqdb.wmo=54857';
+	if( day < 10 ){
+		day = "0"+day;
+	}
+	var furl = 'https://www.wunderground.com/history/airport/ZSQD/'+year+'/'+month+'/'+ day +'/DailyHistory.html?req_city=青岛&req_statename=China&reqdb.zip=00000&reqdb.magic=12&reqdb.wmo=54857';
 	
-	var req = https.get( furl , function( re ){
+	var req  = https.get( furl , function( re ){
 		
 		var fileData = '';
 		
@@ -44,12 +65,50 @@ function getWeaterData( year , month , day){
 			fileData += chunk;
 			
 		}).on('end', function( chunk ) {
-			chunk = chunk ||"";
+			var $ = cheerio.load( fileData );
+			var trs = $("#observations_details tr");  //每一列的数据
+			var tarMap = {};
+			//将每一列的数据展示出来
+			trs.each( function(   i ,item ){
+				if( item ){
+					var list = $(item).find( "td");
+					var time = $( list[0] ).html();
+					
+					if( time && list.length ){
+						tarMap[time] = [];
+
+						list.each( function( j , tar ){
+							var val = null;
+							if( $(tar).find("span.wx-value").length ){
+								val = $( $(tar).find("span.wx-value")[0]).html().replace(/\s/ig , "").replace(/\r/ig , "" ).replace(/\t/ig , "").replace(/\n/ig , "");
+							}else{
+								val = $(tar).html()||"-";
+								val = val.replace(/\s/ig, "").replace(/\r/ig , "" ).replace(/\r/ig , "" ).replace(/\t/ig , "").replace(/\n/ig , "");
+							}
+
+							tarMap[time].push( val );
+						});
+					}
+				}
+			});
+
+			//将map转化成数组
+			var tarArr = [];
+			for(var i in tarMap ){
+				var tar  = tarMap[i];
+				if( tar && tar.length ){
+					tar.unshift( [year,month ,day].join("-"));
+					tarArr.push( tar.join(",").replace(/\s/ig, "").replace(/\r/ig , "" ).replace(/\r/ig , "" ).replace(/\t/ig , "").replace(/\n/ig , "") );	
+				} 
+			}
 			
-			fileData += chunk;
-			var res = cheerio.load( chunk );
-			
-			console.log( fileData );
+			console.log( tarArr.join("\n"));
+			var tarDay= new Date( year ,month -1 ,day ).getTime();
+			var end   = Date.now();    //截止日期，今天
+			if( tarDay <= Date.now() ){
+				var nextDay = new Date( tarDay + 86400000 );
+				getWeaterData( nextDay.getFullYear() , nextDay.getMonth()+1 , nextDay.getDate() );
+			}
 		});
 	});
 	
@@ -61,6 +120,13 @@ function getWeaterData( year , month , day){
     });
 };
 
-getWeaterData();
+
+var start = new Date( 2011 , 0 , 1 ).getTime(); //2011年开始
+
+
+getWeaterData( 2014 , 3 , 1 );
+
+
+
 
 
