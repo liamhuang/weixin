@@ -26,6 +26,7 @@ var easyUTF8 = function( gbk ){
         }  
     }  
     return utf8.join('');  
+<<<<<<< HEAD
 }; 
 
 
@@ -46,17 +47,27 @@ var textArr = [
 	'状况'
 ];
 
+=======
+};  
+>>>>>>> da96675ae169a768ec965e3bad157d7bf96c535a
 
 
 //获取数据
 function getWeaterData( year , month , day){
 
+<<<<<<< HEAD
 	if( day < 10 ){
 		day = "0"+day;
 	}
 	var furl = 'https://www.wunderground.com/history/airport/ZSQD/'+year+'/'+month+'/'+ day +'/DailyHistory.html?req_city=青岛&req_statename=China&reqdb.zip=00000&reqdb.magic=12&reqdb.wmo=54857';
 	
 	var req  = https.get( furl , function( re ){
+=======
+	var r    = Math.random();
+	var furl = 'https://www.wunderground.com/history/airport/ZSQD/2016/12/01/DailyHistory.html?req_city=青岛&req_statename=China&reqdb.zip=00000&reqdb.magic=12&reqdb.wmo=54857';
+	
+	var req = https.get( furl , function( re ){
+>>>>>>> da96675ae169a768ec965e3bad157d7bf96c535a
 		
 		var fileData = '';
 		
@@ -65,6 +76,7 @@ function getWeaterData( year , month , day){
 			fileData += chunk;
 			
 		}).on('end', function( chunk ) {
+<<<<<<< HEAD
 			var $ = cheerio.load( fileData );
 			var trs = $("#observations_details tr");  //每一列的数据
 			var tarMap = {};
@@ -109,6 +121,14 @@ function getWeaterData( year , month , day){
 				var nextDay = new Date( tarDay + 86400000 );
 				getWeaterData( nextDay.getFullYear() , nextDay.getMonth()+1 , nextDay.getDate() );
 			}
+=======
+			chunk = chunk ||"";
+			
+			fileData += chunk;
+			var res = cheerio.load( chunk );
+			
+			console.log( fileData );
+>>>>>>> da96675ae169a768ec965e3bad157d7bf96c535a
 		});
 	});
 	
@@ -120,6 +140,7 @@ function getWeaterData( year , month , day){
     });
 };
 
+<<<<<<< HEAD
 
 var start = new Date( 2011 , 0 , 1 ).getTime(); //2011年开始
 
@@ -128,5 +149,8 @@ getWeaterData( 2014 , 3 , 1 );
 
 
 
+=======
+getWeaterData();
+>>>>>>> da96675ae169a768ec965e3bad157d7bf96c535a
 
 
