@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 var weixin = require('./routes/weixin');
+var upload = require('./routes/upload');
 var access = require('./model/access');     //这个应该做成一个express中间件的更加合适。这里先这么做
 var lapp   = require('./routes/app');   //微信小程序的入口
 
@@ -25,11 +26,12 @@ app.set('view engine', 'jade');
 app.use(bodyParser.text());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/public',express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/cgi/weixin', weixin);
 app.use('/cgi/app' , lapp );
+app.use('/cgi/upload', upload);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -12,7 +12,7 @@ var xml2js    = require("xml2js");
 var mysql     = require("../model/mysql_server");
 var WXBizDataCrypt = require('../util/WXBizDataCrypt')
 
-var sessionKey = "icHMccqKP3WVOaxd8ZapOA==";
+var sessionKey = "";
 var openId     = "";
 var appId      = "wx00dd65d70f19dcec";
 var appSecret  = "f6be58d48df16ecbd6a57d83421ca48e";
@@ -27,7 +27,6 @@ router.all('/', function(req, res, next) {
     var timestamp = req.query.timestamp || "";  //校验的token
     var echostr   = req.query.echostr   || "";  //随机字符
 
-    console.log( req.url );
     if( "getTurboList" == query.action &&  query.code ){   //这里进一步的区分数据的类型
         //这里需要从mysql中获取数据，然后返回给前提
         mysql.getAllTurbo( query.code ,query.type , function( ret,rows ){
@@ -107,6 +106,9 @@ router.all('/', function(req, res, next) {
             console.log( "decrypt param error");
             res.send( {code:-10003 , msg:"dcrypt param error"});
         }
+
+    }else if( "upload" == query.action ){
+        
 
     }else{
         console.log("action error ");
