@@ -108,8 +108,10 @@ router.all('/', function(req, res, next) {
         }
 
     }else if( "upload" == query.action ){
+        console.log( "query:"+JSON.stringify( query ));
+        console.log( "body:"+JSON.stringify( body ));
         
-
+        res.send( {code: 0 ,data: [] , msg:"uploading"} );
     }else{
         console.log("action error ");
         res.send( {code: -10000 ,data: [] , msg:"action error"} );
