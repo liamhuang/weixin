@@ -20,7 +20,7 @@
     var btn = $("#post_data");
     btn.click(function(){
         $.ajax({
-            url: "http://local.qq.com/cgi/upload?code=700",
+            url: "http://request.liamhuang.com?action=upload",
             type: "POST",
             data: {ok:"on",temperature:"18"},
             success: function(){
